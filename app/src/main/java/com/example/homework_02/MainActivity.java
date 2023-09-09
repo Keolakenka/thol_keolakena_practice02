@@ -4,13 +4,18 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.room.Room;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     GetstudentBinding getstudentBinding;
     private String selectedImageUrie;
     private static final int PICK_IMAGE_REQUEST = 1;
-
+    private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 12;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -54,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         UserDAO userDao = db.userDao();
 
 
-
+       //button Insert
         binding.btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,14 +72,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+
+//        custom action bar
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         // Set custom layout for the action bar
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.menu);
-        TextView textViewShowgetData=getSupportActionBar().getCustomView().findViewById(R.id.show);
+//        end custom action bar
 
-//        textView for show getAllData
+
+
+        TextView textViewShowgetData=getSupportActionBar().getCustomView().findViewById(R.id.show);
+        //        textView for show getAllData
         textViewShowgetData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -86,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 List<User> allUsers = userDao.getAllUsers();
                 StringBuilder userText = new StringBuilder();
                 for (User u : allUsers) {
-                    userText.append("User: ").append(u.name).append("Image URL: ").append(u.image).append("\n");
+                    userText.append(u.name).append("\n");
                 }
                 // Set the user text in the TextView
                 textView.setText(userText.toString());
@@ -100,14 +110,27 @@ public class MainActivity extends AppCompatActivity {
         binding.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Create an intent to open the image picker
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intent.setType("image/*");
-                startActivityForResult(intent, PICK_IMAGE_REQUEST);
+                 if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    openImagePicker();
+                } else {
+
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                            REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
+                }
             }
         });
-    }
-    @Override
+
+}
+
+// Open the image picker
+        private void openImagePicker() {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        }
+        @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
