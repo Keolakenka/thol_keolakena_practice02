@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                  if (ContextCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED) {
-                    openImagePicker();
+                    openImage();
                 } else {
 
                     ActivityCompat.requestPermissions(MainActivity.this,
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 }
 
 // Open the image picker
-        private void openImagePicker() {
+        private void openImage() {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             intent.setType("image/*");
             startActivityForResult(intent, PICK_IMAGE_REQUEST);
